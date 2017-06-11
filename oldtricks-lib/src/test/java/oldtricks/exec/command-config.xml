@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns="http://oldtricks/command-builder"
+	xsi:schemaLocation="http://oldtricks/command-builder http://maven.mokumet.com/content/groups/public/oldtricks/oldtricks-lib/1.0.0/oldtricks-lib-1.0.0-cmd_config.xsd">
+	<dummy id="aaaa" sleepMs="5000" inheritIO="true" exitCode="100">
+		<stdout>
+		
+aaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaa</stdout>
+		<stderr>stderr</stderr>
+	</dummy>
+	<cmd id="0001">
+		<cmdline command="cmd.exe">
+			<param>/C</param>
+			<param>dir</param>
+			<param>c:\Program Files</param>
+		</cmdline>
+	</cmd>
+	<cmd id="0002" workdir="f:\" inheritIO="false">
+		<cmdline command="C:\Program Files\MySQL\MySQL Server 5.6\bin\mysqldump.exe">
+			<param>--user=devuser</param>
+			<param>--password=devuser</param>
+			<param>--max_allowed_packet=1G</param>
+			<param>--host=127.0.0.1</param>
+			<param>--port=3306</param>
+			<param>--default-character-set=utf8</param>
+			<param>"test"</param>
+			<param>"sample"</param>
+		</cmdline>
+	</cmd>
+	<jvm id="jvm.sample" workdir="../sandbox" inheritIO="false">
+		<environment>
+			<entry key="" value="" />
+		</environment>
+		<jvmOption>
+			<server />
+			<useConcMarkSweepGC />
+			<verifyNone />
+			<stackSize value="512k" />
+			<maxHeapSize value="64m" />
+			<maxPermSize value="32m" />
+			<withDebug port="5555" suspend="n" />
+			<withGcLog />
+			<withJmx port="1999" />
+			<custom>
+				<value>-Djava.net.preferIPv4Stack=true</value>
+				<value>-Dsun.rmi.dgc.client.gcInterval=3600000</value>
+				<value>-Dsun.rmi.dgc.server.gcInterval=3600000</value>
+			</custom>
+		</jvmOption>
+		<classpath>
+			<anyJar jarDirectory="../sandbox/target/lib" />
+			<value>.</value>
+			<value>./cfg</value>
+		</classpath>
+		<main class="Sample">
+			<param>あああああああああああ</param>
+		</main>
+
+
+	</jvm>
+	<jvm id="jvm.sample2">
+		<jvmOption>
+			<custom>
+				<value>-Djava.net.preferIPv4Stack=true</value>
+			</custom>
+		</jvmOption>
+		<classpath>
+			<value>.</value>
+			<value>lib/*</value>
+		</classpath>
+		<main class="Sample">
+			<param>param1</param>
+		</main>
+	</jvm>
+</configuration>

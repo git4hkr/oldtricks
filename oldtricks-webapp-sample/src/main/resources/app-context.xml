@@ -1,0 +1,116 @@
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns="http://www.springframework.org/schema/beans" xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd
+		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.1.xsd">
+
+	<mvc:annotation-driven />
+	<context:component-scan base-package="webmvc" />
+
+	<!-- TransactionManagerテンプレートを読み込み -->
+	<import resource="classpath:txi-atomikos-context.xml" />
+
+	<!-- SpringのtransactionManager -->
+	<bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+		<property name="transactionManager" ref="txi.transactionManager" />
+		<property name="userTransaction" ref="txi.userTransaction" />
+	</bean>
+
+
+	<!-- デフォルトプロパティ -->
+	<util:properties id="jdbc" local-override="true">
+		<prop key="url">jdbc:mysql://localhost:3306/my_db</prop>
+		<prop key="username">devuser</prop>
+		<prop key="password">devuser</prop>
+		<prop key="initialSize">5</prop>
+		<prop key="maxActive">5</prop>
+		<prop key="maxIdle">5</prop>
+		<prop key="validationQuery">select 1</prop>
+	</util:properties>
+
+	<!-- XA Pooled DataSource -->
+	<bean id="xa.dataSource.1" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init" destroy-method="close">
+		<property name="uniqueResourceName" value="MysqlDataSource" />
+		<property name="xaDataSourceClassName" value="com.mysql.jdbc.jdbc2.optional.MysqlXADataSource" />
+		<property name="xaProperties">	<!-- JDBC Configuration -->
+			<util:properties>
+				<prop key="pinGlobalTxToPhysicalConnection">true</prop>
+				<!-- ↑この設定をtrueにしないと、XA利用時に com.mysql.jdbc.jdbc2.optional.MysqlXAException: XAER_INVAL:
+					Invalid arguments (or unsupported command) エラーが出る -->
+				<prop key="url">#{jdbc['url']}</prop>
+				<prop key="user">#{jdbc['username']}</prop>
+				<prop key="password">#{jdbc['password']}</prop>
+				<prop key="maxRows">100000</prop>
+				<prop key="characterEncoding">UTF-8</prop>
+				<prop key="useUnicode">true</prop>
+				<prop key="tcpKeepAlive">true</prop>
+			</util:properties>
+		</property>
+		<property name="testQuery" value="#{jdbc['validationQuery']}" />
+		<property name="minPoolSize" value="#{jdbc['initialSize']}" />
+		<property name="maxPoolSize" value="#{jdbc['maxActive']}" />
+		<property name="maxIdleTime" value="#{jdbc['maxIdle']}" />
+	</bean>
+	<!-- XA Pooled DataSource -->
+	<bean id="xa.dataSource.2" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init" destroy-method="close">
+		<property name="uniqueResourceName" value="PostgresDataSource" />
+		<property name="xaDataSourceClassName" value="org.postgresql.xa.PGXADataSource" />
+		<property name="xaProperties">	<!-- JDBC Configuration -->
+			<util:properties>
+				<prop key="serverName">localhost</prop>
+				<prop key="portNumber">5432</prop>
+				<prop key="databaseName">my_db</prop>
+				<prop key="user">#{jdbc['username']}</prop>
+				<prop key="password">#{jdbc['password']}</prop>
+			</util:properties>
+		</property>
+		<property name="testQuery" value="#{jdbc['validationQuery']}" />
+		<property name="minPoolSize" value="#{jdbc['initialSize']}" />
+		<property name="maxPoolSize" value="#{jdbc['maxActive']}" />
+		<property name="maxIdleTime" value="#{jdbc['maxIdle']}" />
+	</bean>
+
+	<!-- DataSource Debug Interceptor -->
+	<bean id="dataSource.proxy.1" class="net.sf.log4jdbc.sql.jdbcapi.DataSourceSpy">
+		<constructor-arg ref="xa.dataSource.1" />
+	</bean>
+	<bean id="dataSource.proxy.2" class="net.sf.log4jdbc.sql.jdbcapi.DataSourceSpy">
+		<constructor-arg ref="xa.dataSource.2" />
+	</bean>
+
+	<bean id="sqlSessionFactory.1" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="xa.dataSource.1" />
+	</bean>
+	<bean id="sqlSessionFactory.2" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="xa.dataSource.2" />
+	</bean>
+	<bean id="sqlSessionTemplate.1" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sqlSessionFactory.1" />
+	</bean>
+	<bean id="sqlSessionTemplate.2" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sqlSessionFactory.2" />
+	</bean>
+
+	<!-- JDBC Template -->
+	<bean id="jdbcTemplate.1" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource.proxy.1" />
+		<property name="databaseProductName" value="MySQL" />
+	</bean>
+	<bean id="jdbcTemplate.2" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource.proxy.2" />
+		<property name="databaseProductName" value="PostgreSQL" />
+	</bean>
+
+	<!-- Mybatis Mapper -->
+	<bean id="mapper.1" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="webmvc.dao.D3ContractDao" />
+		<property name="sqlSessionTemplate" ref="sqlSessionTemplate.1" />
+	</bean>
+	<bean id="mapper.2" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="webmvc.dao.D3ContractDao" />
+		<property name="sqlSessionTemplate" ref="sqlSessionTemplate.2" />
+	</bean>
+</beans>

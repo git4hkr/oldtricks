@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration >
+<configuration scan="false">
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS z,JST} [%20.20logger][%15.15thread][%35.35class{5}:%4line] %-5level %msg%n</pattern>
+		</encoder>
+	</appender>
+	<appender name="SYSLOG" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS z,JST} %-5level %mdc{o.syslog.msgid} %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>target/application.log</File>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<FileNamePattern>target/application.%d{yyyy-MM-dd}.log</FileNamePattern>
+			<MaxHistory>10</MaxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS z,JST} %-5level [%20.20logger][%15.15thread][%35.35class{5}:%4line] - %msg%n</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+		</filter>
+	</appender>
+
+	<logger name="org.springframework" level="INFO" additivity="true" />
+	<logger name="log4jdbc.log4j2" level="error" />
+	<logger name="jdbc.resultset" level="warn" />
+	<logger name="jdbc.resultsettable" level="warn" />
+	<logger name="jdbc.audit" level="warn" />
+	<logger name="jdbc.sqlonly" level="info" />
+	<logger name="jdbc.sqltiming" level="info" />
+
+	<logger name="oldtricks" level="TRACE" />
+
+	<logger name="o.syslog" level="TRACE" additivity="true">
+		<appender-ref ref="SYSLOG" />
+	</logger>
+
+	<root level="INFO">
+		<appender-ref ref="STDOUT" />
+	</root>
+
+</configuration>

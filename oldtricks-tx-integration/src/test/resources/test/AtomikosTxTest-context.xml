@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+	<util:properties id="jdbc.prop">
+		<prop key="jdbc.url">jdbc:mysql://localhost:3306/test</prop>
+		<prop key="jdbc.driver">com.mysql.jdbc.Driver</prop>
+		<prop key="jdbc.username">devuser</prop>
+		<prop key="jdbc.password">devuser</prop>
+		<prop key="jdbc.initialSize">1</prop>
+		<prop key="jdbc.minActive">1</prop>
+		<prop key="jdbc.maxActive">5</prop>
+		<prop key="jdbc.maxIdle">60</prop>
+		<prop key="jdbc.validationQuery">select 1</prop>
+	</util:properties>
+	<context:property-placeholder properties-ref="jdbc.prop" />
+
+	<bean id="dbcp.datasource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="defaultAutoCommit" value="false" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="driverClassName" value="${jdbc.driver}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+	</bean>
+	<bean id="spring.datasource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="url" value="${jdbc.url}" />
+		<property name="driverClassName" value="${jdbc.driver}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+	</bean>
+
+	<bean id="dbcp_JdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dbcp.datasource" />
+		<property name="databaseProductName" value="MySQL" />
+	</bean>
+	<bean id="spring_JdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="spring.datasource" />
+		<property name="databaseProductName" value="MySQL" />
+	</bean>
+	
+	<!-- JDBC Configuration -->
+	<util:properties id="jdbcConfiguration">
+		<prop key="pinGlobalTxToPhysicalConnection">true</prop>
+		<!-- ↑この設定をtrueにしないと、XA利用時に com.mysql.jdbc.jdbc2.optional.MysqlXAException: XAER_INVAL:
+			Invalid arguments (or unsupported command) エラーが出る -->
+		<prop key="url">${jdbc.url}</prop>
+		<prop key="user">${jdbc.username}</prop>
+		<prop key="password">${jdbc.password}</prop>
+		<prop key="maxRows">100000</prop>
+		<prop key="characterEncoding">UTF-8</prop>
+		<prop key="useUnicode">true</prop>
+		<prop key="tcpKeepAlive">true</prop>
+	</util:properties>
+
+	<!-- XA Pooled DataSource -->
+	<bean id="xa.dataSource.1" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init" destroy-method="close">
+		<property name="uniqueResourceName" value="MysqlDataSource1" />
+		<property name="xaDataSourceClassName" value="com.mysql.jdbc.jdbc2.optional.MysqlXADataSource" />
+		<property name="xaProperties" ref="jdbcConfiguration" />
+		<property name="testQuery" value="${jdbc.validationQuery}" />
+		<property name="minPoolSize" value="${jdbc.minActive}" />
+		<property name="maxPoolSize" value="${jdbc.maxActive}" />
+		<property name="maxIdleTime" value="${jdbc.maxIdle}" />
+	</bean>
+	<bean id="xa.dataSource.2" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init" destroy-method="close">
+		<property name="uniqueResourceName" value="MysqlDataSource2" />
+		<property name="xaDataSourceClassName" value="com.mysql.jdbc.jdbc2.optional.MysqlXADataSource" />
+		<property name="xaProperties" ref="jdbcConfiguration" />
+		<property name="testQuery" value="${jdbc.validationQuery}" />
+		<property name="minPoolSize" value="${jdbc.minActive}" />
+		<property name="maxPoolSize" value="${jdbc.maxActive}" />
+		<property name="maxIdleTime" value="${jdbc.maxIdle}" />
+	</bean>
+
+
+	<!-- DataSource Debug Interceptor -->
+	<bean id="dataSource.proxy.1" class="net.sf.log4jdbc.sql.jdbcapi.DataSourceSpy">
+		<constructor-arg ref="xa.dataSource.1" />
+	</bean>
+	<bean id="dataSource.proxy.2" class="net.sf.log4jdbc.sql.jdbcapi.DataSourceSpy">
+		<constructor-arg ref="xa.dataSource.2" />
+	</bean>
+
+
+	<!-- JTA TransactionManager -->
+	<bean id="AtomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager" init-method="init"
+		destroy-method="close">
+		<!-- close が呼び出された時, トランザクションを強制終了するかどうか -->
+		<property name="forceShutdown" value="false" />
+		<property name="transactionTimeout" value="300" />
+	</bean>
+
+	<bean id="AtomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp">
+		<property name="transactionTimeout" value="300" />
+	</bean>
+
+	<!-- tx-integrationとしてNativeのJTA tansactionManagerに共通の名前をつける -->
+	<alias name="AtomikosTransactionManager" alias="txi.transactionManager" />
+	<alias name="AtomikosUserTransaction" alias="txi.userTransaction" />
+
+
+	<!-- Spring TransactionManager -->
+	<bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+		<property name="transactionManager" ref="txi.transactionManager" />
+		<property name="userTransaction" ref="txi.userTransaction" />
+		<property name="allowCustomIsolationLevels" value="true" />
+	</bean>
+
+	<!-- JDBC Template -->
+	<bean id="jdbcTemplate1" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="spring.datasource" />
+		<property name="databaseProductName" value="MySQL" />
+	</bean>
+	<bean id="jdbcTemplate2" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource.proxy.2" />
+		<property name="databaseProductName" value="MySQL" />
+	</bean>
+
+
+</beans>

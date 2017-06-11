@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+	<import resource="classpath:txi-jboss-context.xml" />
+
+	<util:properties id="jdbc.prop">
+		<prop key="jdbc.url">jdbc:mysql://localhost:3306/test</prop>
+		<prop key="jdbc.driver">com.mysql.jdbc.Driver</prop>
+		<prop key="jdbc.username">devuser</prop>
+		<prop key="jdbc.password">devuser</prop>
+		<prop key="jdbc.initialSize">1</prop>
+		<prop key="jdbc.maxActive">5</prop>
+		<prop key="jdbc.maxIdle">5</prop>
+		<prop key="jdbc.validationQuery">select 1</prop>
+	</util:properties>
+
+	<context:property-placeholder properties-ref="jdbc.prop" />
+
+	<!-- MySQL XA DataSource -->
+	<bean id="mysqlXADataSource" class="com.mysql.jdbc.jdbc2.optional.MysqlXADataSource">
+		<property name="pinGlobalTxToPhysicalConnection" value="true" />
+		<!-- ↑この設定をtrueにしないと、XA利用時に com.mysql.jdbc.jdbc2.optional.MysqlXAException: XAER_INVAL:
+			Invalid arguments (or unsupported command) エラーが出る -->
+		<property name="url" value="${jdbc.url}" />
+		<property name="user" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="maxRows" value="100000" />
+		<property name="characterEncoding" value="UTF-8" />
+		<property name="useUnicode" value="true" />
+		<property name="tcpKeepAlive" value="true" />
+	</bean>
+	<!-- ConnectionPool DataSource -->
+	<bean id="xa.dataSource" class="org.apache.commons.dbcp.managed.BasicManagedDataSource" destroy-method="close">
+		<property name="defaultAutoCommit" value="true" />
+		<property name="xaDataSourceInstance" ref="mysqlXADataSource" />
+		<property name="transactionManager" ref="txi.transactionManager" />
+		<property name="initialSize" value="${jdbc.initialSize}" />
+		<property name="maxActive" value="${jdbc.maxActive}" />
+		<property name="maxIdle" value="${jdbc.maxIdle}" />
+		<property name="validationQuery" value="${jdbc.validationQuery}" />
+	</bean>
+	<!-- DataSource Debug Interceptor -->
+	<bean id="dataSource.proxy" class="net.sf.log4jdbc.sql.jdbcapi.DataSourceSpy">
+		<constructor-arg ref="xa.dataSource" />
+	</bean>
+
+</beans>

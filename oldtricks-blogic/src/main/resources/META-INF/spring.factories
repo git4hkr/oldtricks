@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+oldtricks.blogic.autoconfigure.BLogicXADataSourceAutoConfiguration,\
+oldtricks.blogic.autoconfigure.MybatisAutoConfiguration

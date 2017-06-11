@@ -1,0 +1,80 @@
+#!/bin/bash
+
+##############################
+# user env
+##############################
+JAVA_OPT="${JAVA_OPT} ${mvn.filter.shell.java.opt.1}"
+JAVA_OPT="${JAVA_OPT} ${mvn.filter.shell.java.opt.2}"
+JAVA_OPT="${JAVA_OPT} ${mvn.filter.shell.java.opt.3}"
+JAVA_OPT="${JAVA_OPT} ${mvn.filter.shell.java.opt.4}"
+JAVA_OPT="${JAVA_OPT} ${mvn.filter.shell.java.opt.5}"
+
+
+##############################
+# environments
+##############################
+export LANG=ja_JP.UTF-8
+INST_DIR=${mvn.filter.install.dir}
+TEMP_DIR=${mvn.filter.tmp.dir}
+
+##############################
+# java config
+##############################
+JAVA_HOME=/usr/java/default
+# jarの配置パス
+LIBDIR=lib
+# JAVAのクラスパス
+
+CLASSPATH=cfg
+
+if [ "X" == "X$LOG_LEVEL" ]; then
+        export LOG_LEVEL=INFO;
+fi
+
+#########################################################
+# function : ログ出力
+#   params : メッセージLEVEL
+#   params : メッセージID
+#   params : メッセージ
+#########################################################
+function log()
+{
+	local L_LEVEL;
+	L_LEVEL=$1;
+	local L_SHELL_NAME
+	L_SHELL_NAME=`basename $0`
+	echo [`date '+%Y/%m/%d %H:%M:%S'`][$L_SHELL_NAME \($$\)] $L_LEVEL $2;
+}
+
+#########################################################
+# function : 異常終了
+#########################################################
+function err(){
+	log "ERROR" "[$1]";
+	exit 1
+}
+#########################################################
+# function : メイン
+#########################################################
+if [ ! -d $INST_DIR ]
+then
+	err "$INST_DIR がみつかりません。"
+fi
+
+LIBS=`ls $INST_DIR/$LIBDIR/*.jar`
+for name in $LIBS; do
+	CLASSPATH="${CLASSPATH}:$name"
+done
+
+${TEMP_DIR:=/tmp}
+rm -rf $TEMP_DIR/*
+JAVA_OPT="${JAVA_OPT} -Duser.dir=. -Djava.io.tmpdir=$TEMP_DIR"
+CMD="$JAVA_HOME/bin/java ${JAVA_OPT} -cp ${CLASSPATH} oldtricks.launch.WebAppLauncher $@"
+log "INFO" "launching java. [$CMD]";
+$CMD
+exit_code=$?
+if [ $exit_code -ne 0 ]
+then
+	err "JAVAエラー exit_code=$exit_code"
+fi
+exit 0

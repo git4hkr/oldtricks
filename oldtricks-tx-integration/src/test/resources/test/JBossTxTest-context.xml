@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+	<util:properties id="jdbc.prop">
+		<prop key="jdbc.url">jdbc:mysql://localhost:3306/test</prop>
+		<prop key="jdbc.driver">com.mysql.jdbc.Driver</prop>
+		<prop key="jdbc.username">devuser</prop>
+		<prop key="jdbc.password">devuser</prop>
+		<prop key="jdbc.initialSize">1</prop>
+		<prop key="jdbc.maxActive">5</prop>
+		<prop key="jdbc.maxIdle">5</prop>
+		<prop key="jdbc.validationQuery">select 1</prop>
+	</util:properties>
+	<context:property-placeholder properties-ref="jdbc.prop" />
+
+
+	<!-- MySQL XA DataSource -->
+	<bean id="mysqlXADataSource.1" class="com.mysql.jdbc.jdbc2.optional.MysqlXADataSource">
+		<property name="pinGlobalTxToPhysicalConnection" value="true" />
+		<!-- ↑この設定をtrueにしないと、XA利用時に com.mysql.jdbc.jdbc2.optional.MysqlXAException: XAER_INVAL:
+			Invalid arguments (or unsupported command) エラーが出る -->
+		<property name="url" value="${jdbc.url}" />
+		<property name="user" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="maxRows" value="100000" />
+		<property name="characterEncoding" value="UTF-8" />
+		<property name="useUnicode" value="true" />
+		<property name="tcpKeepAlive" value="true" />
+	</bean>
+	<bean id="mysqlXADataSource.2" class="com.mysql.jdbc.jdbc2.optional.MysqlXADataSource">
+		<property name="pinGlobalTxToPhysicalConnection" value="true" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="user" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="maxRows" value="100000" />
+		<property name="characterEncoding" value="UTF-8" />
+		<property name="useUnicode" value="true" />
+		<property name="tcpKeepAlive" value="true" />
+	</bean>
+
+	<!-- ConnectionPool DataSource -->
+	<bean id="xa.dataSource.1" class="org.apache.commons.dbcp.managed.BasicManagedDataSource" destroy-method="close">
+		<property name="defaultAutoCommit" value="true" />
+		<property name="xaDataSourceInstance" ref="mysqlXADataSource.1" />
+		<property name="transactionManager" ref="jbossTransactionManager" />
+		<property name="initialSize" value="${jdbc.initialSize}" />
+		<property name="maxActive" value="${jdbc.maxActive}" />
+		<property name="maxIdle" value="${jdbc.maxIdle}" />
+		<property name="validationQuery" value="${jdbc.validationQuery}" />
+	</bean>
+	<bean id="xa.dataSource.2" class="org.apache.commons.dbcp.managed.BasicManagedDataSource" destroy-method="close">
+		<property name="defaultAutoCommit" value="true" />
+		<property name="xaDataSourceInstance" ref="mysqlXADataSource.2" />
+		<property name="transactionManager" ref="jbossTransactionManager" />
+		<property name="maxActive" value="${jdbc.maxActive}" />
+		<property name="maxIdle" value="${jdbc.maxIdle}" />
+		<property name="validationQuery" value="${jdbc.validationQuery}" />
+	</bean>
+
+	<!-- DataSource Debug Interceptor -->
+	<bean id="dataSource.proxy.1" class="net.sf.log4jdbc.sql.jdbcapi.DataSourceSpy">
+		<constructor-arg ref="xa.dataSource.1" />
+	</bean>
+	<bean id="dataSource.proxy.2" class="net.sf.log4jdbc.sql.jdbcapi.DataSourceSpy">
+		<constructor-arg ref="xa.dataSource.2" />
+	</bean>
+	<alias name="dataSource.proxy.1" alias="dataSource.1" />
+	<alias name="dataSource.proxy.2" alias="dataSource.2" />
+
+	<!-- Transaction Manager -->
+	<!-- jbossTransactionManagerのプロパティをsystemプロパティ経由で設定する -->
+	<bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean" id="systemPrereqs">
+		<property name="targetObject" value="#{@systemProperties}" />
+		<property name="targetMethod" value="putAll" />
+		<property name="arguments">
+			<util:properties>
+				<!-- https://access.redhat.com/site/documentation/ja-JP/JBoss_Enterprise_Application_Platform/5/html/Transactions_Development_Guide/ch15.html -->
+				<prop key="com.arjuna.ats.arjuna.coordinator.defaultTimeout">30000</prop>
+				<prop key="com.arjuna.ats.arjuna.objectstore.objectStoreDir">/tmp</prop>
+				<prop key="ObjectStoreEnvironmentBean.objectStoreDir">/tmp</prop>
+			</util:properties>
+		</property>
+	</bean>
+	<bean id="jbossTransactionManager" class="com.arjuna.ats.internal.jta.transaction.arjunacore.TransactionManagerImple"
+		depends-on="systemPrereqs" />
+	<bean id="jbossUserTransaction" class="com.arjuna.ats.internal.jta.transaction.arjunacore.UserTransactionImple" />
+
+	<bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+		<property name="transactionManager" ref="jbossTransactionManager" />
+		<property name="userTransaction" ref="jbossUserTransaction" />
+	</bean>
+
+	<!-- JDBC Template -->
+	<bean id="jdbcTemplate1" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource.1" />
+		<property name="databaseProductName" value="MySQL" />
+	</bean>
+	<bean id="jdbcTemplate2" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource.2" />
+		<property name="databaseProductName" value="MySQL" />
+	</bean>
+
+
+</beans>

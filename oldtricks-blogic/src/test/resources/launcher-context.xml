@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+
+	<context:annotation-config />
+
+	<bean id="main" class="oldtricks.blogic.cli.CliBLogicTest.SampleBLogic" />
+
+	<bean id="executor" class="oldtricks.exec.CommandExecutorBean">
+		<property name="name" value="command-executor" />
+		<property name="limit" value="5" />
+		<property name="threadsSize" value="3" />
+	</bean>
+
+	<aop:config proxy-target-class="true">
+		<aop:advisor advice-ref="stat" pointcut="execution(* oldtricks.executor.ExecutorSupport+.*(..))" />
+	</aop:config>
+	<bean id="stat" class="oldtricks.blogic.interceptor.StatisticsInterceptor">
+		<property name="windowSize" value="100000" />
+	</bean>
+</beans>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" targetNamespace="http://oldtricks/command-builder" xmlns:tns="http://oldtricks/command-builder"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:element name="configuration" type="tns:configuration" />
+
+	<xs:complexType name="intValue">
+		<xs:sequence />
+		<xs:attribute name="value" type="xs:int" />
+	</xs:complexType>
+
+	<xs:complexType name="dummy">
+		<xs:complexContent>
+			<xs:extension base="tns:cmd">
+				<xs:sequence>
+					<xs:element name="stdout" type="xs:string" form="qualified" minOccurs="0" />
+					<xs:element name="stderr" type="xs:string" form="qualified" minOccurs="0" />
+				</xs:sequence>
+				<xs:attribute name="exitCode" type="xs:string" />
+				<xs:attribute name="sleepMs" type="xs:string" />
+				<xs:attribute name="handler" type="xs:string" />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="cmd">
+		<xs:complexContent>
+			<xs:extension base="tns:abstractCmd">
+				<xs:sequence>
+					<xs:element name="cmdline" form="qualified" minOccurs="0">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="param" type="xs:string" form="qualified" maxOccurs="unbounded" />
+							</xs:sequence>
+							<xs:attribute name="command" type="xs:string" use="required" />
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="environment" type="tns:environment" form="qualified" minOccurs="0" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="abstractCmd">
+		<xs:sequence />
+		<xs:attribute name="id" type="xs:string" use="required" />
+		<xs:attribute name="workdir" type="xs:string" />
+		<xs:attribute name="inheritIO" type="xs:boolean" />
+	</xs:complexType>
+
+	<xs:complexType name="environment">
+		<xs:sequence>
+			<xs:element name="entry" type="tns:entry" form="qualified" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="entry">
+		<xs:sequence />
+		<xs:attribute name="key" type="xs:string" use="required" />
+		<xs:attribute name="value" type="xs:string" use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="jvm">
+		<xs:complexContent>
+			<xs:extension base="tns:cmd">
+				<xs:sequence>
+					<xs:element name="jvmOption" form="qualified" minOccurs="0">
+						<xs:complexType>
+							<xs:all>
+								<xs:element name="server" type="xs:string" form="qualified" minOccurs="0" />
+								<xs:element name="useConcMarkSweepGC" type="xs:string" form="qualified" minOccurs="0" />
+								<xs:element name="stackSize" type="tns:simpleValue" form="qualified" minOccurs="0" />
+								<xs:element name="survivorRatio" type="tns:simpleValue" form="qualified" minOccurs="0" />
+								<xs:element name="startHeapSize" type="tns:simpleValue" form="qualified" minOccurs="0" />
+								<xs:element name="maxHeapSize" type="tns:simpleValue" form="qualified" minOccurs="0" />
+								<xs:element name="newSize" type="tns:simpleValue" form="qualified" minOccurs="0" />
+								<xs:element name="maxPermSize" type="tns:simpleValue" form="qualified" minOccurs="0" />
+								<xs:element name="withDebug" form="qualified" minOccurs="0">
+									<xs:complexType>
+										<xs:sequence />
+										<xs:attribute name="port" type="xs:string" />
+										<xs:attribute name="suspend" type="xs:string" />
+									</xs:complexType>
+								</xs:element>
+								<xs:element name="withGcLog" type="xs:string" form="qualified" minOccurs="0" />
+								<xs:element name="withJmx" form="qualified" minOccurs="0">
+									<xs:complexType>
+										<xs:sequence />
+										<xs:attribute name="port" type="xs:string" />
+									</xs:complexType>
+								</xs:element>
+								<xs:element name="custom" form="qualified" minOccurs="0">
+									<xs:complexType>
+										<xs:sequence>
+											<xs:element name="value" type="xs:string" form="qualified" maxOccurs="unbounded" />
+										</xs:sequence>
+									</xs:complexType>
+								</xs:element>
+								<xs:element name="verifyNone" type="xs:string" form="qualified" minOccurs="0" />
+							</xs:all>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="classpath" form="qualified" minOccurs="0">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="anyJar" form="qualified" minOccurs="0" maxOccurs="unbounded">
+									<xs:complexType>
+										<xs:sequence />
+										<xs:attribute name="jarDirectory" type="xs:string" />
+									</xs:complexType>
+								</xs:element>
+								<xs:element name="value" type="xs:string" form="qualified" minOccurs="0" maxOccurs="unbounded" />
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="main" form="qualified" minOccurs="0">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="param" type="xs:string" form="qualified" minOccurs="0" maxOccurs="unbounded" />
+							</xs:sequence>
+							<xs:attribute name="class" type="xs:string" />
+							<xs:attribute name="executableJar" type="xs:string" />
+						</xs:complexType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="simpleValue">
+		<xs:sequence />
+		<xs:attribute name="value" type="xs:string" use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="configuration">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element name="cmd" type="tns:cmd" form="qualified" />
+				<xs:element name="jvm" type="tns:jvm" form="qualified" />
+				<xs:element name="dummy" type="tns:dummy" form="qualified" />
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="booleanValue">
+		<xs:sequence />
+		<xs:attribute name="value" type="xs:boolean" />
+	</xs:complexType>
+
+	<xs:complexType name="env">
+		<xs:sequence>
+			<xs:element name="entry" type="tns:entry" form="qualified" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>
+

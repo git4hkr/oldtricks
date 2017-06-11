@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns="http://oldtricks/command-builder" xsi:schemaLocation="http://oldtricks/command-builder command-builder.xsd ">
+	<cmd id="aaa">
+		<environment>
+			<entry key="" value="" />
+		</environment>
+		<cmdline command="java">
+			<param>1</param>
+			<param>2</param>
+		</cmdline>
+	</cmd>
+	<jvm id="jvm.sample" workdir="../sandbox" inheritIO="false">
+		<environment>
+			<entry key="" value="" />
+		</environment>
+		<jvmOption>
+			<server />
+			<useConcMarkSweepGC />
+			<verifyNone />
+			<stackSize value="512k" />
+			<maxHeapSize value="64m" />
+			<maxPermSize value="32m" />
+			<withDebug port="5555" suspend="n" />
+			<withGcLog />
+			<withJmx port="1999" />
+			<custom>
+				<value>-Djava.net.preferIPv4Stack=true</value>
+				<value>-Dsun.rmi.dgc.client.gcInterval=3600000</value>
+				<value>-Dsun.rmi.dgc.server.gcInterval=3600000</value>
+			</custom>
+		</jvmOption>
+		<classpath>
+			<anyJar jarDirectory="../sandbox/target/lib" />
+			<value>.</value>
+			<value>./cfg</value>
+		</classpath>
+		<main class="Sample">
+			<param>あああああああああああ</param>
+		</main>
+
+
+	</jvm>
+	<jvm id="jvm.sample2">
+		<jvmOption>
+			<custom>
+				<value>-Djava.net.preferIPv4Stack=true</value>
+			</custom>
+		</jvmOption>
+		<classpath>
+			<value>.</value>
+			<value>lib/*</value>
+		</classpath>
+		<main class="Sample">
+			<param>param1</param>
+		</main>
+	</jvm>
+</configuration>

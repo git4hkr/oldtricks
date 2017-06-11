@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+	<bean id="AtomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager" init-method="init"
+		destroy-method="close">
+		<!-- close が呼び出された時, トランザクションを強制終了するかどうか -->
+		<property name="forceShutdown" value="true" />
+		<property name="transactionTimeout" value="300" />
+	</bean>
+
+	<bean id="AtomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp">
+		<property name="transactionTimeout" value="300" />
+	</bean>
+
+	<!-- tx-integrationとしてNativeのJTA TansactionManagerに共通の名前をつける -->
+	<alias name="AtomikosTransactionManager" alias="txi.transactionManager" />
+	<alias name="AtomikosUserTransaction" alias="txi.userTransaction" />
+
+	<!-- JMX MBean -->
+	<bean id="jmxTransactionService" class="com.atomikos.icatch.admin.jmx.JmxTransactionService">
+		<property name="heuristicsOnly" value="true" />
+	</bean>
+	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+		<property name="beans">
+			<map>
+				<entry key="atomikos:name=tx-service">
+					<ref bean="jmxTransactionService" />
+				</entry>
+			</map>
+		</property>
+	</bean>
+</beans>

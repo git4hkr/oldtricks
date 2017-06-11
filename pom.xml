@@ -1,0 +1,83 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>oldtricks</groupId>
+		<artifactId>oldtricks-parent</artifactId>
+		<version>1.0.8</version>
+	</parent>
+
+	<artifactId>oldtricks</artifactId>
+	<version>1.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>OLDTRICKS</name>
+
+	<modules>
+		<module>oldtricks-dependency</module>
+		<module>oldtricks-lib</module>
+		<module>oldtricks-lib-ex</module>
+		<module>oldtricks-blogic-api</module>
+		<module>oldtricks-blogic</module>
+	</modules>
+
+	<scm>
+		<developerConnection>scm:svn:https://www.mokumet.com/svn/oldtricks/trunk</developerConnection>
+	</scm>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<configuration>
+					<tagBase>https://www.mokumet.com/svn/oldtricks/tags/oldtricks/</tagBase>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.4</version>
+				<configuration>
+					<locales>ja</locales>
+					<inputEncoding>${project.build.sourceEncoding}</inputEncoding>
+					<outputEncoding>${project.reporting.outputEncoding}</outputEncoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-jxr-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<aggregate>true</aggregate>
+					<inputEncoding>${project.build.sourceEncoding}</inputEncoding>
+					<outputEncoding>${project.reporting.outputEncoding}</outputEncoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>2.13</version>
+				<configuration>
+					<configLocation>http://maven.mokumet.com/nexus/service/local/repositories/releases/content/oldtricks/oldtricks-parent/1.0.8/oldtricks-parent-1.0.8-checkstyle.xml</configLocation>
+					<headerLocation>http://maven.mokumet.com/nexus/service/local/repositories/releases/content/oldtricks/oldtricks-parent/1.0.8/oldtricks-parent-1.0.8-LICENSE.txt</headerLocation>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>findbugs-maven-plugin</artifactId>
+				<version>3.0.0</version>
+				<configuration>
+					<xmlOutput>true</xmlOutput>
+					<inputEncoding>${project.build.sourceEncoding}</inputEncoding>
+					<outputEncoding>${project.reporting.outputEncoding}</outputEncoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>javancss-maven-plugin</artifactId>
+				<version>2.1</version>
+			</plugin>
+		</plugins>
+	</reporting>
+</project>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration >
+<configuration scan="true">
+	<jmxConfigurator />
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS z,JST} %-5level [%20.20logger][%15.15thread][%35.35class{5}:%4line] - %msg%n
+			</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>DEBUG</level>
+		</filter>
+	</appender>
+
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>target/fcps.log</File>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<FileNamePattern>target/fcps.%d{yyyy-MM-dd}.log</FileNamePattern>
+			<MaxHistory>10</MaxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS z,JST} %-5level [%20.20logger][%15.15thread][%35.35class{5}:%4line] - %msg%n
+			</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>DEBUG</level>
+		</filter>
+	</appender>
+
+	<logger name="org.springframework" level="INFO" additivity="true" />
+	<logger name="org.springframework.transaction" level="INFO" additivity="true" />
+	<logger name="org.springframework.jdbc" level="INFO" additivity="true" />
+
+	<logger name="com.atomikos" level="INFO" additivity="true" />
+
+	<logger name="log4jdbc.debug" level="INFO" additivity="true" />
+	<logger name="jdbc" level="info" additivity="true" />
+	<logger name="jdbc.connection" level="info" additivity="true" />
+	<logger name="jdbc.resultsettable" level="warn" additivity="true" />
+	<logger name="jdbc.resultset" level="warn" additivity="true" />
+	<logger name="jdbc.sqltiming" level="WARN" additivity="true" />
+	<logger name="jdbc.audit" level="warn" additivity="true" />
+	<logger name="jdbc.sqlonly" level="debug" additivity="true" />
+
+	<root>
+		<appender-ref ref="STDOUT" />
+	</root>
+
+</configuration>

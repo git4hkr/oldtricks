@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration >
+<configuration scan="false">
+	<contextName>oldtricks-webapp-sample</contextName>
+	<jmxConfigurator />
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS z,JST} %-5level [%70.70logger][%25.25thread][%35.35class{5}:%4line] %msg%n</pattern>
+		</encoder>
+	</appender>
+	<appender name="SYSLOG" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS z,JST} %-5level [%mdc{o.syslog.caller}] [%mdc{o.syslog.msgid}] %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>target/application.log</File>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<FileNamePattern>target/application.%d{yyyy-MM-dd}.log</FileNamePattern>
+			<MaxHistory>10</MaxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS z,JST} %-5level [%30.30logger][%25.25thread][%35.35class{5}:%4line] %msg%n</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+		</filter>
+	</appender>
+
+	<logger name="org.springframework" level="info" additivity="true" />
+	<logger name="com.atomikos" level="warn" additivity="true" />
+	<logger name="jdbc.resultset" level="warn" additivity="true" />
+	<logger name="jdbc.audit" level="warn" additivity="true" />
+	<logger name="jdbc.sqlonly" level="warn" additivity="true" />
+	<logger name="o.syslog" level="TRACE" additivity="false">
+		<appender-ref ref="SYSLOG" />
+	</logger>
+
+	<root level="INFO">
+		<appender-ref ref="STDOUT" />
+	</root>
+
+</configuration>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns="http://oldtricks/command-builder"
+	xsi:schemaLocation="http://oldtricks/command-builder http://maven.mokumet.com/content/groups/public/oldtricks/oldtricks-lib/1.0.0/oldtricks-lib-1.0.0-cmd_config.xsd">
+	<dummy id="dummy.0001" exitCode="100" sleepMs="1000" >
+	<stdout>aaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaa
+a</stdout>
+	</dummy>
+	<cmd id="0001" inheritIO="${filter.inheritIO}">
+		<cmdline command="cmd.exe">
+			<param>dir</param>
+			<param>${cmd.param}</param>
+		</cmdline>
+	</cmd>
+	<cmd id="0002" workdir="${target.dir}">
+		<environment>
+			<entry key="JAVA_HOME" value="/usr/java/default" />
+		</environment>
+		<cmdline command="cmd.exe">
+			<param>dir</param>
+		</cmdline>
+	</cmd>
+	<jvm id="jvm.sample" workdir="../sandbox" inheritIO="false">
+		<environment>
+			<entry key="" value="" />
+		</environment>
+		<jvmOption>
+			<server />
+			<useConcMarkSweepGC />
+			<verifyNone />
+			<stackSize value="512k" />
+			<maxHeapSize value="64m" />
+			<maxPermSize value="32m" />
+			<withDebug port="5555" suspend="n" />
+			<withGcLog />
+			<withJmx port="1999" />
+			<custom>
+				<value>-Djava.net.preferIPv4Stack=true</value>
+				<value>-Dsun.rmi.dgc.client.gcInterval=3600000</value>
+				<value>-Dsun.rmi.dgc.server.gcInterval=3600000</value>
+			</custom>
+		</jvmOption>
+		<classpath>
+			<anyJar jarDirectory="../sandbox/target/lib" />
+			<value>.</value>
+			<value>./cfg</value>
+		</classpath>
+		<main class="Sample">
+			<param>あああああああああああ</param>
+		</main>
+	</jvm>
+	<jvm id="jvm.sample2">
+		<jvmOption>
+			<custom>
+				<value>-Djava.net.preferIPv4Stack=true</value>
+			</custom>
+		</jvmOption>
+		<classpath>
+			<value>.</value>
+			<value>lib/*</value>
+		</classpath>
+		<main class="Sample">
+			<param>param1</param>
+		</main>
+	</jvm>
+
+</configuration>

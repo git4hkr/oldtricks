@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration >
+<configuration scan="true">
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>[%X{test.class}][%X{test.method}] %d{yyyy-MM-dd HH:mm:ss.SSS z,JST} %-5level [%20.20logger][%15.15thread][%35.35class{5}:%4line] - %msg%n</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>DEBUG</level>
+		</filter>
+	</appender>
+
+	<!--
+		<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+		<file>target/regression/regression.log</file>
+		<append>false</append>
+		<layout class="ch.qos.logback.classic.PatternLayout">
+		<pattern>[%X{test.class}][%X{test.method}] %d{yyyy-MM-dd HH:mm:ss.SSS z,JST} %-5level [%20.20logger][%15.15thread][%35.35class{5}:%4line]
+		- %msg%n</pattern>
+		</layout>
+		</appender>
+	-->
+
+	<appender name="SIFT" class="ch.qos.logback.classic.sift.SiftingAppender">
+		<discriminator>
+			<key>test.output.dir</key>
+			<defaultValue>target/regression/default</defaultValue>
+		</discriminator>
+		<sift>
+			<appender name="FILE-${test.output.dir}" class="ch.qos.logback.core.FileAppender">
+				<file>${test.output.dir}/regression.log</file>
+				<append>false</append>
+				<layout class="ch.qos.logback.classic.PatternLayout">
+					<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS z,JST} %-5level [%20.20logger][%15.15thread][%35.35class{5}:%4line] - %msg%n</pattern>
+				</layout>
+			</appender>
+		</sift>
+	</appender>
+
+
+	<logger name="org.springframework" level="INFO" additivity="true" />
+	<logger name="org.springframework.transaction" level="INFO" additivity="true" />
+	<logger name="org.springframework.jdbc" level="INFO" additivity="true" />
+	<logger name="httpclient.wire" level="DEBUG" />
+	<logger name="com.atomikos" level="INFO" additivity="true" />
+
+	<logger name="log4jdbc.debug" level="INFO" additivity="true" />
+	<logger name="jdbc" level="info" additivity="true" />
+	<logger name="jdbc.connection" level="info" additivity="true" />
+	<logger name="jdbc.resultsettable" level="INFO" additivity="true" />
+	<logger name="jdbc.resultset" level="warn" additivity="true" />
+	<logger name="jdbc.sqltiming" level="WARN" additivity="true" />
+	<logger name="jdbc.audit" level="warn" additivity="true" />
+	<logger name="jdbc.sqlonly" level="debug" additivity="true" />
+
+	<root level="ALL">
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="FILE" />
+		<appender-ref ref="SIFT" />
+	</root>
+
+</configuration>
