@@ -7,8 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
 
+import oldtricks.blogic.BLogicEntry;
 import oldtricks.blogic.springcontext.BLogicFilterWithLifeCycle;
 import oldtricks.blogic.springcontext.filter.exception.ExceptionHandlerMethodResolver;
 import oldtricks.blogic.springcontext.filter.exception.HandlerMethod;
@@ -21,7 +21,7 @@ public class ExceptionHandlerFilter implements BLogicFilterWithLifeCycle {
 	@Override
 	public boolean accept(Method method) {
 		try {
-			return method.getAnnotation(RequestMapping.class) != null;
+			return method.getAnnotation(BLogicEntry.class) != null;
 		} catch (Exception e) {
 			return false;
 		}

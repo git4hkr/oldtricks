@@ -1,10 +1,6 @@
 package oldtricks.blogic.datasource;
 
-import javax.sql.DataSource;
-
-import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
-
-public class BLogicDataSourceRouter extends AbstractRoutingDataSource implements DataSourceProxy {
+public class BLogicDataSourceRouter {
 
 	private static final ThreadLocal<Object> UNIQUE_RESOURCE_KEY = new ThreadLocal<>();
 
@@ -22,16 +18,6 @@ public class BLogicDataSourceRouter extends AbstractRoutingDataSource implements
 
 	public static boolean isAbsent() {
 		return getUniqueResourceId() == null;
-	}
-
-	@Override
-	protected Object determineCurrentLookupKey() {
-		return getUniqueResourceId();
-	}
-
-	@Override
-	public DataSource getRowDataSource() {
-		return determineCurrentLookupKey() == null ? null : determineTargetDataSource();
 	}
 
 }
