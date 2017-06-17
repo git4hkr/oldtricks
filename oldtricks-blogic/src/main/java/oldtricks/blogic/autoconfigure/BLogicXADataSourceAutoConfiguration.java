@@ -18,17 +18,14 @@ import org.springframework.boot.bind.RelaxedDataBinder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.jta.XADataSourceWrapper;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
-import oldtricks.blogic.BLogicAvailabilityZoneResolver;
 import oldtricks.blogic.datasource.BLogicDataSourceKey;
-import oldtricks.blogic.datasource.BLogicDataSourceRouter;
-import oldtricks.blogic.jdbc.DataSourceProxyAwareJdbcTemplate;
+import oldtricks.blogic.datasource.BLogicDataSourceRegistry;
+import oldtricks.blogic.datasource.BLogicDataSourceRegistryImpl;
 
 @EnableConfigurationProperties(DataSourceRouterProperties.class)
 @ConditionalOnClass({ DataSource.class, TransactionManager.class, EmbeddedDatabaseType.class })
@@ -42,28 +39,12 @@ public class BLogicXADataSourceAutoConfiguration implements BeanClassLoaderAware
 	private DataSourceRouterProperties prop;
 
 	private ClassLoader classLoader;
-	private Map<Object, Object> xaDataSources = new HashMap<>();
+	private Map<Object, DataSource> xaDataSources = new HashMap<>();
 
 	@Bean
 	@ConditionalOnMissingBean
-	public BLogicAvailabilityZoneResolver availabilityZoneResolver() throws Exception {
-		return null;
-	}
-
-	@Bean
-	@Primary
-	public DataSource dataSource() throws Exception {
-		BLogicDataSourceRouter ds = new BLogicDataSourceRouter();
-		ds.setTargetDataSources(xaDataSources);
-		return ds;
-	}
-
-	@Bean
-	@Primary
-	public JdbcTemplate jdbcTemplate(DataSource dataSource) {
-		JdbcTemplate bean = new DataSourceProxyAwareJdbcTemplate();
-		bean.setDataSource(dataSource);
-		return bean;
+	public BLogicDataSourceRegistry blogicDataSourceRegistry() throws Exception {
+		return new BLogicDataSourceRegistryImpl(xaDataSources);
 	}
 
 	@Override
@@ -103,9 +84,11 @@ public class BLogicXADataSourceAutoConfiguration implements BeanClassLoaderAware
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		for (Map<String, Object> prop : this.prop.getProps()) {
-			BLogicDataSourceKey key = createDataSourceKey(prop);
-			xaDataSources.put(key, createDataSource(key.getUniqueResourceName(), prop));
+		if (prop != null) {
+			for (Map<String, Object> prop : this.prop.getProps()) {
+				BLogicDataSourceKey key = createDataSourceKey(prop);
+				xaDataSources.put(key, createDataSource(key.getUniqueResourceName(), prop));
+			}
 		}
 	}
 
