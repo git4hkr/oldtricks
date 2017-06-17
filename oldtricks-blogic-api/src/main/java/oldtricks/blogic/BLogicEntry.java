@@ -22,13 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
-<<<<<<< HEAD
  * 業務ロジックのエントリーメソッドに付与します。
-=======
- * 業務ロジックです。
- *
- * @author $Author$
->>>>>>> branch 'master' of https://github.com/git4hkr/oldtricks.git
  *
  */
 @Inherited
