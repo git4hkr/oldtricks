@@ -7,9 +7,7 @@ import java.lang.annotation.Target;
 import java.sql.Connection;
 
 /**
- * 本アノテーションを付与したメソッドで宣言的トランザクションを開始します。
- *
- * @author $Author$
+ * 本アノテーションを付与したメソッドで宣言的トランザクションを開始します。<br>
  *
  */
 @Target(ElementType.METHOD)

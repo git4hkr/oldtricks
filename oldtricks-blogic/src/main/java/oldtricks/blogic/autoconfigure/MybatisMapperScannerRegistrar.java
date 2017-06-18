@@ -36,6 +36,7 @@ import org.springframework.util.StringUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import oldtricks.blogic.autoconfigure.MybatisAutoConfiguration.MybatisBeanFactory;
+import oldtricks.blogic.datasource.BLogicDataSourceKey;
 import oldtricks.blogic.datasource.BLogicDataSourceRegistry;
 import oldtricks.blogic.datasource.BLogicDataSourceRouter;
 import oldtricks.blogic.mybatis.CustomClassPathMapperScanner;
@@ -109,7 +110,8 @@ public class MybatisMapperScannerRegistrar
 				mapperFactory.setSqlSessionFactory(factory);
 				mapperFactory.setSqlSessionTemplate(mybatisBeanFactory.sqlSessionTemplate(factory));
 				mapperFactory.afterPropertiesSet();
-				mappers.put(entry.getKey(), mapperFactory.getObject());
+				Object mapper = mapperFactory.getObject();
+				mappers.put(entry.getKey(), mapper);
 			}
 			// Mapperルーターの実体です。
 			Object mapperProxy = Proxy.newProxyInstance(mapperInterface.getClassLoader(),
@@ -118,7 +120,7 @@ public class MybatisMapperScannerRegistrar
 
 						@Override
 						public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-							// データソースルーターのキーを使ってMappperのルーティングを行う。
+							// データソースルーターのキーを使ってMapperのルーティングを行う。
 							Object key = BLogicDataSourceRouter.getUniqueResourceId();
 							Object target = _mappers.get(key);
 							return method.invoke(target, args);

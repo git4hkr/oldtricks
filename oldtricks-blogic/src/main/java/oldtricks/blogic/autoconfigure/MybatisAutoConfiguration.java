@@ -31,6 +31,7 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer;
 import org.mybatis.spring.boot.autoconfigure.MybatisProperties;
 import org.mybatis.spring.boot.autoconfigure.SpringBootVFS;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -108,10 +109,10 @@ public class MybatisAutoConfiguration {
 	}
 
 	public class MybatisBeanFactory {
+
 		public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
 			SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
 			factory.setDataSource(dataSource);
-			factory.setSqlSessionFactoryBuilder(new SqlSessionFactoryBuilder());
 			factory.setVfs(SpringBootVFS.class);
 			if (StringUtils.hasText(properties.getConfigLocation())) {
 				factory.setConfigLocation(resourceLoader.getResource(properties.getConfigLocation()));
@@ -125,7 +126,9 @@ public class MybatisAutoConfiguration {
 					customizer.customize(configuration);
 				}
 			}
-			factory.setConfiguration(configuration);
+			Configuration cloneconfiguration = new Configuration();
+			BeanUtils.copyProperties(configuration, cloneconfiguration);
+			factory.setConfiguration(cloneconfiguration);
 			if (properties.getConfigurationProperties() != null) {
 				factory.setConfigurationProperties(properties.getConfigurationProperties());
 			}

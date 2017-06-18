@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 業務ロジックのエントリーメソッドに付与します。
+ * 業務ロジックのエントリーメソッドに付与することで、{@link BLogicExceptionHandler}などを利用可能とします。
  *
  */
 @Inherited

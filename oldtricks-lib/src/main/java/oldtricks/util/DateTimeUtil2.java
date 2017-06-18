@@ -1,6 +1,8 @@
 package oldtricks.util;
 
+import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -8,40 +10,47 @@ import java.util.Date;
 
 public abstract class DateTimeUtil2 {
 	/** デバッグ向け現在時刻 */
-	private static ThreadLocal<ZonedDateTime> NOW = new ThreadLocal<ZonedDateTime>();
+	private static ThreadLocal<LocalDateTime> NOW = new ThreadLocal<>();
 
 	/** デバッグ向け現在時刻を設定します */
-	public static void setNow(ZonedDateTime now) {
+	public static void setNow(LocalDateTime now) {
 		NOW.set(now);
 	}
 
-	private static ZonedDateTime getNow() {
+	private static LocalDateTime getNow() {
 		return NOW.get();
 	}
 
 	/**
 	 * 現在時刻を取得します。
 	 *
-	 * @return 現在時刻のZonedDateTime
+	 * @return 現在時刻のLocalDateTime
 	 */
-	public static ZonedDateTime now() {
-		ZonedDateTime now = getNow();
+	public static LocalDateTime now() {
+		LocalDateTime now = getNow();
 		if (now != null)
 			return now;
-		return ZonedDateTime.now();
+		return LocalDateTime.now();
 	}
 
-	public static ZonedDateTime parse(String val, String pattern) {
-		return ZonedDateTime.parse(val, DateTimeFormatter.ofPattern(pattern));
+	public static LocalDateTime parse(String val, String pattern) {
+		return LocalDateTime.parse(val, DateTimeFormatter.ofPattern(pattern));
 	}
 
-	public static ZonedDateTime toZonedDateTime(Date date) {
+	public static LocalDateTime toZonedDateTime(Date date) {
 		Instant instant = Instant.ofEpochMilli(date.getTime());
-		return ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
+		return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
 	}
 
-	public static Date toDate(ZonedDateTime dateTime) {
-		Instant instant = dateTime.toInstant();
-		return Date.from(instant);
+	public static Date toDate(LocalDateTime dateTime) {
+		ZoneId zone = ZoneId.systemDefault();
+		ZonedDateTime zonedDateTime = ZonedDateTime.of(dateTime, zone);
+		Instant instant = zonedDateTime.toInstant();
+		Date date = Date.from(instant);
+		return date;
+	}
+
+	public static Timestamp toTimestamp(LocalDateTime localDateTime) {
+		return Timestamp.valueOf(localDateTime);
 	}
 }

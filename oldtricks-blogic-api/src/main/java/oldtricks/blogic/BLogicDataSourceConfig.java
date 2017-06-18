@@ -6,9 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 本アノテーションを付与したメソッドで宣言的データソースルーティングを適用します。 メソッド内では単一のデータソースにのみアクセスできます。
- *
- * @author $Author$
+ * 本アノテーションを付与したメソッドで宣言的データソースルーティングを適用します。 <BR>
+ * 本アノテーションを付与したメソッド内では単一のデータソースにのみアクセスできます。
  *
  */
 @Target(ElementType.METHOD)
