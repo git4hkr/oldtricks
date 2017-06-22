@@ -36,10 +36,10 @@ import org.springframework.util.StringUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import oldtricks.blogic.autoconfigure.MybatisAutoConfiguration.MybatisBeanFactory;
-import oldtricks.blogic.datasource.BLogicDataSourceKey;
 import oldtricks.blogic.datasource.BLogicDataSourceRegistry;
 import oldtricks.blogic.datasource.BLogicDataSourceRouter;
 import oldtricks.blogic.mybatis.CustomClassPathMapperScanner;
+import oldtricks.util.Assert;
 import oldtricks.util.ClassUtil;
 
 @Slf4j
@@ -123,6 +123,8 @@ public class MybatisMapperScannerRegistrar
 							// データソースルーターのキーを使ってMapperのルーティングを行う。
 							Object key = BLogicDataSourceRouter.getUniqueResourceId();
 							Object target = _mappers.get(key);
+							Assert.notNull(target,
+									"Data source for the specified key can not be found in mapper registry. key=" + key.toString());
 							return method.invoke(target, args);
 						}
 					});

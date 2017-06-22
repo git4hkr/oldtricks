@@ -64,7 +64,6 @@ public class CustomClassPathMapperScanner {
 				if (resource.isReadable()) {
 					try {
 						MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(resource);
-						// TODO
 						for (String anno : metadataReader.getAnnotationMetadata().getAnnotationTypes()) {
 							if ("org.apache.ibatis.annotations.Mapper".equals(anno)
 									&& metadataReader.getClassMetadata().isInterface()) {
