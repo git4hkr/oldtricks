@@ -125,9 +125,11 @@ public class MybatisAutoConfiguration {
 					customizer.customize(configuration);
 				}
 			}
-			Configuration cloneconfiguration = new Configuration();
-			BeanUtils.copyProperties(configuration, cloneconfiguration);
-			factory.setConfiguration(cloneconfiguration);
+			if (configuration != null) {
+				Configuration cloneconfiguration = new Configuration();
+				BeanUtils.copyProperties(configuration, cloneconfiguration);
+				factory.setConfiguration(cloneconfiguration);
+			}
 			if (properties.getConfigurationProperties() != null) {
 				factory.setConfigurationProperties(properties.getConfigurationProperties());
 			}
