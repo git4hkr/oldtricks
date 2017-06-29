@@ -103,7 +103,7 @@ public class MybatisMapperScannerRegistrar
 		@Override
 		public Object getObject() throws Exception {
 			Map<Object, Object> mappers = new HashMap<>();
-			for (Entry<Object, DataSource> entry : bLogicDataSourceRegistry.getDataSources().entrySet()) {
+			for (Entry<String, DataSource> entry : bLogicDataSourceRegistry.getUrlDsMap().entrySet()) {
 				MapperFactoryBean mapperFactory = new MapperFactoryBean();
 				mapperFactory.setMapperInterface(mapperInterface);
 				SqlSessionFactory factory = mybatisBeanFactory.sqlSessionFactory(entry.getValue());
@@ -124,7 +124,8 @@ public class MybatisMapperScannerRegistrar
 							Object key = BLogicDataSourceRouter.getUniqueResourceId();
 							Object target = _mappers.get(key);
 							Assert.notNull(target,
-									"Data source for the specified key can not be found in mapper registry. key=" + key.toString());
+									"Data source for the specified key can not be found in mapper registry. key="
+											+ key.toString());
 							return method.invoke(target, args);
 						}
 					});

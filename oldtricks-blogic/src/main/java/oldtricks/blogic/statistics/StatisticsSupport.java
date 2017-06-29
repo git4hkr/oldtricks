@@ -13,21 +13,21 @@ import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
-import oldtricks.blogic.Constant;
-import oldtricks.util.JmxUtil;
-import oldtricks.util.StringUtil;
-
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math.stat.descriptive.SynchronizedDescriptiveStatistics;
+
+import oldtricks.blogic.Constant;
+import oldtricks.util.JmxUtil;
+import oldtricks.util.StringUtil;
 
 public class StatisticsSupport {
 	protected static final int DEFAULT_WINDOW_SIZE = 100000;// 1エントリーあたり1Mbyte程度のHeapを消費する
 	protected ConcurrentMap<String, Statistics> stats = new ConcurrentHashMap<>();
 
-	public void addValue(String key, double value, int windowSize) throws MalformedObjectNameException,
-			InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException,
-			InstanceNotFoundException {
+	public void addValue(String key, double value, int windowSize)
+			throws MalformedObjectNameException, InstanceAlreadyExistsException, MBeanRegistrationException,
+			NotCompliantMBeanException, InstanceNotFoundException {
 		if (StringUtil.isNotBlank(key)) {
 			stats.putIfAbsent(key, new Statistics(key, windowSize));
 			stats.get(key).addValue(value);
@@ -49,10 +49,10 @@ public class StatisticsSupport {
 		String line = String.format(format, (Object[]) header);
 		builder.append(line + SystemUtils.LINE_SEPARATOR);
 		for (Entry<String, Statistics> entry : stats.entrySet()) {
-			line = String.format(format, entry.getValue().getMin(), entry.getValue().getMax(), entry.getValue()
-					.get90Percentile(), entry.getValue().get95Percentile(), entry.getValue().getSampleNum(), entry
-					.getValue().getTotalMin(), entry.getValue().getTotalMax(), entry.getValue().getTotalAvg(), entry
-					.getValue().getTotalSample(), entry.getKey());
+			line = String.format(format, entry.getValue().getMin(), entry.getValue().getMax(),
+					entry.getValue().get90Percentile(), entry.getValue().get95Percentile(),
+					entry.getValue().getSampleNum(), entry.getValue().getTotalMin(), entry.getValue().getTotalMax(),
+					entry.getValue().getTotalAvg(), entry.getValue().getTotalSample(), entry.getKey());
 			builder.append(line + SystemUtils.LINE_SEPARATOR);
 		}
 		return builder.toString();
@@ -67,9 +67,9 @@ public class StatisticsSupport {
 		private double totalMax = Double.MIN_VALUE;
 		private double totalSum = 0;
 
-		public Statistics(String key, int windowSize) throws MalformedObjectNameException,
-				InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException,
-				InstanceNotFoundException {
+		public Statistics(String key, int windowSize)
+				throws MalformedObjectNameException, InstanceAlreadyExistsException, MBeanRegistrationException,
+				NotCompliantMBeanException, InstanceNotFoundException {
 			super();
 			Hashtable<String, String> table = new Hashtable<>();
 			table.put("Name", "BLogicStatistics");
@@ -124,7 +124,7 @@ public class StatisticsSupport {
 		}
 
 		@Override
-		synchronized public void clear() {
+		public synchronized void clear() {
 			total.set(0);
 			totalMax = Double.MIN_VALUE;
 			totalMin = Double.MAX_VALUE;

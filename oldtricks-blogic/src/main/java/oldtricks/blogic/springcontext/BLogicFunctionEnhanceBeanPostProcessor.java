@@ -120,8 +120,8 @@ public class BLogicFunctionEnhanceBeanPostProcessor implements InstantiationAwar
 			} else {
 				filters.add(new StatisticsFilter());
 				filters.add(new ExceptionHandlerFilter());
-				filters.add(new BLogicTransactionFilter());
 				filters.add(new BLogicDataSourceRouterFilter());
+				filters.add(new BLogicTransactionFilter());
 				filters.add(new BLogicFunctionFilter());
 				for (Class<? extends BLogicFilter> bLogicFilterClass : bLogicFilters.value()) {
 					try {
@@ -134,8 +134,8 @@ public class BLogicFunctionEnhanceBeanPostProcessor implements InstantiationAwar
 		} else {
 			filters.add(new StatisticsFilter());
 			filters.add(new ExceptionHandlerFilter());
-			filters.add(new BLogicTransactionFilter());
 			filters.add(new BLogicDataSourceRouterFilter());
+			filters.add(new BLogicTransactionFilter());
 			filters.add(new BLogicFunctionFilter());
 		}
 		return filters;

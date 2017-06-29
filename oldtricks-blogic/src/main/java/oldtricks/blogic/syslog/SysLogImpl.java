@@ -36,12 +36,10 @@ import oldtricks.blogic.syslog.MsgLoader.Msg;
  * <configuration scan="false">
  * 	<appender name="SYSLOG" class="ch.qos.logback.core.ConsoleAppender">
  * 		<encoder>
- * }
- * <code>			&lt;pattern&gt;%d{yyyy-MM-dd HH:mm:ss.SSS z,JST} %-5level [%mdc{o.syslog.caller}] [%mdc{o.syslog.msgid}] %msg%n&lt;/pattern&gt;</code>
- * {@code
- * 		</encoder>
+ * 			&lt;pattern&gt;%d{yyyy-MM-dd HH:mm:ss.SSS z,JST} %-5level [%mdc{o.syslog.caller}]
+ *                                                              [%mdc{o.syslog.msgid}] %msg%n&lt;/pattern&gt;
+ *		</encoder>
  * 	</appender>
- *
  * 	<logger name="o.syslog" level="TRACE" additivity="false">
  * 		<appender-ref ref="SYSLOG" />
  * 	</logger>

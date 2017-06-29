@@ -38,13 +38,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import oldtricks.blogic.BLogicExceptionHandler;
-
 import org.springframework.core.ExceptionDepthComparator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
+
+import oldtricks.blogic.BLogicExceptionHandler;
 
 /**
  * Discovers {@linkplain BLogicExceptionHandler} methods in a given class type,
@@ -68,7 +68,7 @@ public class ExceptionHandlerMethodResolver {
 	/**
 	 * A filter for selecting {@link BLogicExceptionHandler} methods.
 	 */
-	public final static MethodFilter EXCEPTION_HANDLER_METHODS = new MethodFilter() {
+	public static final MethodFilter EXCEPTION_HANDLER_METHODS = new MethodFilter() {
 
 		public boolean matches(Method method) {
 			return AnnotationUtils.findAnnotation(method, BLogicExceptionHandler.class) != null;

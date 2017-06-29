@@ -1,6 +1,7 @@
 package oldtricks.blogic.datasource;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 import org.springframework.context.ApplicationContext;
 
@@ -10,6 +11,7 @@ import oldtricks.blogic.BLogicShardNoResolver;
 import oldtricks.blogic.springcontext.BLogicFilterWithLifeCycle;
 
 public class BLogicDataSourceRouterFilter implements BLogicFilterWithLifeCycle {
+	private BLogicDataSourceRegistry bLogicDataSourceRegistry;
 
 	@Override
 	public boolean accept(Method method) {
@@ -22,12 +24,23 @@ public class BLogicDataSourceRouterFilter implements BLogicFilterWithLifeCycle {
 		BLogicDataSourceConfig config = method.getAnnotation(BLogicDataSourceConfig.class);
 		BLogicDataSourceKey key = new BLogicDataSourceKey(config.type(), config.readReplica(),
 				getShardNo(config.type(), target, args), getAvailabilityZone(target));
-		try {
-			BLogicDataSourceRouter.setUniqueRsourceId(key);
-			return next.invoke(target, method, args);
-		} finally {
-			BLogicDataSourceRouter.clearUniqueResourceId();
+		List<String> urls = bLogicDataSourceRegistry.getUrls(key);
+		Throwable ex = null;
+		for (String url : urls) {
+			try {
+				BLogicDataSourceRouter.setUniqueRsourceId(url);
+				return next.invoke(target, method, args);
+			} catch (Throwable e) {
+				ex = e;
+			} finally {
+				BLogicDataSourceRouter.clearUniqueResourceId();
+			}
 		}
+		if (ex != null) {
+			throw ex;
+		}
+		// 設計上到達不能
+		return null;
 	}
 
 	int getShardNo(String type, Object target, Object[] args) throws Exception {
@@ -46,6 +59,7 @@ public class BLogicDataSourceRouterFilter implements BLogicFilterWithLifeCycle {
 
 	@Override
 	public void init(Object target, ApplicationContext applicationContext) throws Throwable {
+		this.bLogicDataSourceRegistry = applicationContext.getBean(BLogicDataSourceRegistry.class);
 	}
 
 	@Override
