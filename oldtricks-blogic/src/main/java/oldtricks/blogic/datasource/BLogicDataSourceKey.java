@@ -8,7 +8,7 @@ public class BLogicDataSourceKey {
 	private String type;
 	private String availabilityZone;
 	private int shardNo = 0;
-	private boolean readReplica = true;
+	private boolean isReadReplica = true;
 
 	public BLogicDataSourceKey() {
 	}
@@ -26,6 +26,6 @@ public class BLogicDataSourceKey {
 	}
 
 	public String getUniqueResourceName() {
-		return type + "[" + shardNo + "]_" + availabilityZone + "_" + readReplica;
+		return type + "[" + shardNo + "]_" + availabilityZone + "_" + isReadReplica;
 	}
 }

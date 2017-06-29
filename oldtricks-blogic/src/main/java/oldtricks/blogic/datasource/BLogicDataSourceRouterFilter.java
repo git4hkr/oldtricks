@@ -4,12 +4,15 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.util.Assert;
 
+import lombok.extern.slf4j.Slf4j;
 import oldtricks.blogic.BLogicAvailabilityZoneResolver;
 import oldtricks.blogic.BLogicDataSourceConfig;
 import oldtricks.blogic.BLogicShardNoResolver;
 import oldtricks.blogic.springcontext.BLogicFilterWithLifeCycle;
 
+@Slf4j
 public class BLogicDataSourceRouterFilter implements BLogicFilterWithLifeCycle {
 	private BLogicDataSourceRegistry bLogicDataSourceRegistry;
 
@@ -25,6 +28,8 @@ public class BLogicDataSourceRouterFilter implements BLogicFilterWithLifeCycle {
 		BLogicDataSourceKey key = new BLogicDataSourceKey(config.type(), config.readReplica(),
 				getShardNo(config.type(), target, args), getAvailabilityZone(target));
 		List<String> urls = bLogicDataSourceRegistry.getUrls(key);
+		Assert.notNull(urls,
+				"Data source for the specified key can not be found in datasource registry. key=" + key.toString());
 		Throwable ex = null;
 		for (String url : urls) {
 			try {
@@ -32,6 +37,7 @@ public class BLogicDataSourceRouterFilter implements BLogicFilterWithLifeCycle {
 				return next.invoke(target, method, args);
 			} catch (Throwable e) {
 				ex = e;
+				log.info("datasource access is failed. url=[{}]. trying to recover with next datasource.", url);
 			} finally {
 				BLogicDataSourceRouter.clearUniqueResourceId();
 			}
